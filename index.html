@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Beautiful Memories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .memory-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            background: white;
+            transform-style: preserve-3d;
+        }
+        
+        .memory-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
+        .memory-image {
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .memory-card:hover .memory-image {
+            transform: scale(1.05);
+        }
+        
+        .title {
+            font-family: 'Dancing Script', cursive;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .memory-date {
+            font-family: 'Dancing Script', cursive;
+            color: #ff758c;
+        }
+    </style>
+</head>
+<body class="pb-20">
+    <div class="container mx-auto px-4 py-12">
+        <!-- Header -->
+        <header class="text-center mb-16">
+            <h1 class="title text-5xl md:text-6xl font-bold mb-4 text-pink-600">Our Journey Together</h1>
+            <p class="text-xl text-gray-600">Every moment with you becomes a beautiful memory</p>
+            <button id="addMemoryBtn" class="mt-8 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition">Add New Memory</button>
+        </header>
+        
+        <!-- Timeline -->
+        <div class="timeline">
+            <!-- Existing memories will be appended here -->
+        </div>
+    </div>
+    
+    <!-- Add Memory Modal -->
+    <div id="memoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold mb-4">Add a New Memory</h2>
+            <form id="memoryForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Memory Title</label>
+                    <input type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="Our special day" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Date</label>
+                    <input type="date" class="w-full px-3 py-2 border rounded-lg" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Upload Image</label>
+                    <input type="file" accept="image/*" class="w-full px-3 py-2 border rounded-lg" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 mb-2">Description</label>
+                    <textarea class="w-full px-3 py-2 border rounded-lg" rows="4" placeholder="Why is this memory special?" required></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="cancelMemoryBtn" class="mr-2 px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600">Save Memory</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function setupModal() {
+            const modal = document.getElementById('memoryModal');
+            const addBtn = document.getElementById('addMemoryBtn');
+            const cancelBtn = document.getElementById('cancelMemoryBtn');
+            const form = document.getElementById('memoryForm');
+            
+            addBtn.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Get form values
+                const title = form.querySelector('input[type="text"]').value;
+                const date = form.querySelector('input[type="date"]').value;
+                const fileInput = form.querySelector('input[type="file"]');
+                const description = form.querySelector('textarea').value;
+
+                // Create a new memory card
+                const newMemory = document.createElement('div');
+                newMemory.className = 'memory-card mb-16 w-full md:w-1/2 mx-auto md:mx-0 relative group';
+                newMemory.setAttribute('data-date', date);
+
+                // Create a FileReader to read the uploaded image
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    newMemory.innerHTML = `
+                        <div class="polaroid-effect">
+                            <img src="${event.target.result}" alt="${title}" class="memory-image w-full">
+                        </div>
+                        <div class="p-6">
+                            <div class="memory-date text-2xl mb-2">${new Date(date).toLocaleDateString()}</div>
+                            <h3 class="text-2xl font-semibold mb-3">${title}</h3>
+                            <p class="text-gray-600">${description}</p>
+                            <div class="mt-4 flex items-center">
+                                <span class="text-pink-500 mr-2">❤️</span>
+                                <span class="text-sm text-gray-500">New memory added</span>
+                            </div>
+                        </div>
+                    `;
+                    // Append the new memory to the timeline
+                    const timeline = document.querySelector('.timeline');
+                    timeline.appendChild(newMemory);
+                    
+                    // Close the modal and reset the form
+                    modal.classList.add('hidden');
+                    form.reset();
+                };
+
+                // Read the uploaded file as a data URL
+                if (fileInput.files.length > 0) {
+                    reader.readAsDataURL(fileInput.files[0]);
+                }
+            });
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            setupModal();
+        });
+    </script>
+</body>
+</html>
