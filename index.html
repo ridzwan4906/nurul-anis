@@ -230,7 +230,7 @@
   tick(); setInterval(tick,1000);
   const obs = new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('vis'); }),{threshold:.12}); document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
   
-  // ========== MEMORY CAFE WITH GOOGLE SHEETS (Supabase style using Web App) ==========
+    // ========== MEMORY CAFE WITH GOOGLE SHEETS (FIXED DATE FORMAT) ==========
   const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwQA2ZLqhOWCJPpv5go1ZlKPpMGOCm08ZotElAMlJ1mxnywzzHYj6bHM5fSNlHHY3Vp/exec';
   let selectedCat = { emoji: '🍡', name: 'Mochi' };
 
@@ -239,13 +239,56 @@
 
   async function loadMemories() { try { const response = await fetch(WEBAPP_URL); if (!response.ok) throw new Error('Network response was not ok'); const data = await response.json(); return Array.isArray(data) ? data : []; } catch (error) { console.error('Error loading memories:', error); toastMsg('Failed to load memories. Check internet connection.', true); return []; } }
   
-  async function saveMemory(memory) { try { const formData = new URLSearchParams(); formData.append('action', 'save'); formData.append('title', memory.title); formData.append('date', memory.date); formData.append('description', memory.description); formData.append('image', memory.image); formData.append('catEmoji', memory.catEmoji); formData.append('catName', memory.catName); const response = await fetch(WEBAPP_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() }); if (!response.ok) throw new Error('Save failed'); const result = await response.json(); return result.status === 'success'; } catch (error) { console.error('Error saving memory:', error); toastMsg('Failed to save memory. Try again.', true); return false; } }
+  async function saveMemory(memory) { 
+    try { 
+      const formData = new URLSearchParams(); 
+      formData.append('action', 'save'); 
+      formData.append('title', memory.title); 
+      // PASTIKAN TARIKH DALAM FORMAT YYYY-MM-DD SAHAJA
+      const formattedDate = memory.date.split('T')[0]; // Jika ada T, ambil bahagian depan saja
+      formData.append('date', formattedDate); 
+      formData.append('description', memory.description); 
+      formData.append('image', memory.image); 
+      formData.append('catEmoji', memory.catEmoji); 
+      formData.append('catName', memory.catName); 
+      const response = await fetch(WEBAPP_URL, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
+        body: formData.toString() 
+      }); 
+      if (!response.ok) throw new Error('Save failed'); 
+      const result = await response.json(); 
+      return result.status === 'success'; 
+    } catch (error) { 
+      console.error('Error saving memory:', error); 
+      toastMsg('Failed to save memory. Try again.', true); 
+      return false; 
+    } 
+  }
 
   function toastMsg(msg, err = false) { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show' + (err ? ' error' : ''); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000); }
 
   function compress(file, cb) { const r = new FileReader(); r.onload = e => { const img = new Image(); img.onload = () => { const MAX = 900; const scale = img.width > MAX ? MAX / img.width : 1; const c = document.createElement('canvas'); c.width = img.width * scale; c.height = img.height * scale; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', 0.72)); }; img.src = e.target.result; }; r.readAsDataURL(file); }
 
-  function createCard(mem) { const card = document.createElement('div'); card.className = 'memory-card'; card.dataset.id = mem.id; const dateStr = mem.date ? new Date(mem.date + 'T00:00:00').toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : ''; card.innerHTML = `<div class="card-img-wrap"><div class="card-cat-stamp">${mem.catEmoji || '🍡'}</div><img class="memory-image" src="${mem.image}" alt="${mem.title}"></div><div class="card-body"><div class="card-date">${dateStr}</div><h3 class="card-title">${escapeHtml(mem.title)}</h3><p class="card-desc">${escapeHtml(mem.description)}</p><div class="card-footer"><span class="card-hearts">✦ Saved by ${escapeHtml(mem.catName || 'Mochi')}</span><button class="delete-btn" title="Delete this memory">🗑</button></div></div>`; card.querySelector('.delete-btn').addEventListener('click', () => toastMsg('Delete feature: Coming soon with Google Sheets!', false)); return card; }
+  function createCard(mem) { const card = document.createElement('div'); card.className = 'memory-card'; card.dataset.id = mem.id; 
+    // Handle tarikh dari pelbagai format
+    let displayDate = '';
+    if (mem.date) {
+      let dateStr = mem.date;
+      // Jika ada T, ambil bahagian depan
+      if (dateStr.includes('T')) dateStr = dateStr.split('T')[0];
+      // Cuba buat Date object
+      const parsedDate = new Date(dateStr);
+      if (!isNaN(parsedDate.getTime())) {
+        displayDate = parsedDate.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+      } else {
+        displayDate = dateStr;
+      }
+    }
+    card.innerHTML = `<div class="card-img-wrap"><div class="card-cat-stamp">${mem.catEmoji || '🍡'}</div><img class="memory-image" src="${mem.image}" alt="${mem.title}"></div><div class="card-body"><div class="card-date">${displayDate}</div><h3 class="card-title">${escapeHtml(mem.title)}</h3><p class="card-desc">${escapeHtml(mem.description)}</p><div class="card-footer"><span class="card-hearts">✦ Saved by ${escapeHtml(mem.catName || 'Mochi')}</span><button class="delete-btn" title="Delete this memory">🗑</button></div></div>`; 
+    card.querySelector('.delete-btn').addEventListener('click', () => toastMsg('Delete feature: Coming soon with Google Sheets!', false)); 
+    return card; 
+  }
   
   function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m === '&') return '&amp;'; if(m === '<') return '&lt;'; if(m === '>') return '&gt;'; return m;}); }
 
@@ -257,7 +300,41 @@
   document.getElementById('addMemoryBtn').addEventListener('click', () => modal.classList.add('open'));
   document.getElementById('cancelBtn').addEventListener('click', () => { modal.classList.remove('open'); document.getElementById('inputTitle').value = ''; document.getElementById('inputDate').value = ''; document.getElementById('inputFile').value = ''; document.getElementById('inputDesc').value = ''; document.getElementById('formError').style.display = 'none'; });
   modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
-  document.getElementById('saveBtn').addEventListener('click', async () => { const title = document.getElementById('inputTitle').value.trim(); const date = document.getElementById('inputDate').value; const file = document.getElementById('inputFile').files[0]; const desc = document.getElementById('inputDesc').value.trim(); const err = document.getElementById('formError'); if (!title || !date || !file || !desc) { err.style.display = 'block'; return; } err.style.display = 'none'; toastMsg('Processing image...'); compress(file, async (base64) => { const newMemory = { id: Date.now().toString(), title, date, description: desc, image: base64, catEmoji: selectedCat.emoji, catName: selectedCat.name, created_at: new Date().toISOString() }; const success = await saveMemory(newMemory); if (success) { toastMsg(`✦ Memory saved by ${selectedCat.name}!`); renderAll(); modal.classList.remove('open'); document.getElementById('inputTitle').value = ''; document.getElementById('inputDate').value = ''; document.getElementById('inputFile').value = ''; document.getElementById('inputDesc').value = ''; } else { toastMsg('Save failed, please try again.', true); } }); });
+  document.getElementById('saveBtn').addEventListener('click', async () => { 
+    const title = document.getElementById('inputTitle').value.trim(); 
+    const date = document.getElementById('inputDate').value;  // Ini dari input type="date" -> format YYYY-MM-DD
+    const file = document.getElementById('inputFile').files[0]; 
+    const desc = document.getElementById('inputDesc').value.trim(); 
+    const err = document.getElementById('formError'); 
+    if (!title || !date || !file || !desc) { err.style.display = 'block'; return; } 
+    err.style.display = 'none'; 
+    toastMsg('Processing image...'); 
+    compress(file, async (base64) => { 
+      // GUNAKAN DATE TERUS DARI INPUT (sudah dalam format YYYY-MM-DD)
+      const newMemory = { 
+        id: Date.now().toString(), 
+        title, 
+        date: date,  // ← INI SUDAH FORMAT YYYY-MM-DD, BUKAN ISO TIMESTAMP
+        description: desc, 
+        image: base64, 
+        catEmoji: selectedCat.emoji, 
+        catName: selectedCat.name, 
+        created_at: new Date().toISOString() 
+      }; 
+      const success = await saveMemory(newMemory); 
+      if (success) { 
+        toastMsg(`✦ Memory saved by ${selectedCat.name}!`); 
+        renderAll(); 
+        modal.classList.remove('open'); 
+        document.getElementById('inputTitle').value = ''; 
+        document.getElementById('inputDate').value = ''; 
+        document.getElementById('inputFile').value = ''; 
+        document.getElementById('inputDesc').value = ''; 
+      } else { 
+        toastMsg('Save failed, please try again.', true); 
+      } 
+    }); 
+  });
   renderAll();
 </script>
 </body>
