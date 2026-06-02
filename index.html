@@ -1,171 +1,686 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Beautiful Memories</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;600&display=swap');
-        
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            color: #333;
-            overflow-x: hidden;
-        }
-        
-        .memory-card {
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            border-radius: 15px;
-            overflow: hidden;
-            background: white;
-            transform-style: preserve-3d;
-        }
-        
-        .memory-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-        
-        .memory-image {
-            height: 250px;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .memory-card:hover .memory-image {
-            transform: scale(1.05);
-        }
-        
-        .title {
-            font-family: 'Dancing Script', cursive;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .timeline {
-            position: relative;
-            padding-left: 20px;
-        }
-        
-        .memory-date {
-            font-family: 'Dancing Script', cursive;
-            color: #ff758c;
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>For My Love, Nurul Anis 💜 | Our Memory Café</title>
+  <!-- fonts from both pages -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ==================== GLOBAL & VARIABLES (merged both) ==================== */
+    :root {
+      --deep:    #0f0720;
+      --void:    #1b0d38;
+      --mid:     #2e1760;
+      --violet:  #6d28d9;
+      --lavender:#a78bfa;
+      --lilac:   #c4b5fd;
+      --petal:   #f0abfc;
+      --blush:   #fce7f3;
+      --gold:    #fde68a;
+      --cream:   #fdf8ff;
+      /* memory cafe extras */
+      --purple-deep: #2d1b69;
+      --purple-mid: #6b3fa0;
+      --purple-soft: #a855f7;
+      --purple-pale: #e9d5ff;
+      --accent-pink: #f0abfc;
+      --accent-gold: #fbbf24;
+      --text-dark: #1e1033;
+      --text-mid: #5b4a8a;
+      --text-light: #9d7ec9;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--deep);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--cream);
+      min-height: 100vh;
+      overflow-x: hidden;
+      cursor: none; /* will be overridden in memory cafe sections? we keep custom cursor only on first part but merging both -> keep cursor: none + custom js works sitewide */
+    }
+
+    /* ── custom cursor from letter ── */
+    #cursor, #trail {
+      position: fixed; border-radius: 50%;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+    }
+    #cursor { width: 12px; height: 12px; background: var(--petal); mix-blend-mode: screen; }
+    #trail  { width: 28px; height: 28px; border: 1px solid rgba(196,181,253,.35); transition: all .25s ease; }
+
+    /* canvas stars from letter */
+    #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* mesh background from letter */
+    .mesh {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 20%, rgba(109,40,217,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 80% 80%, rgba(196,181,253,.1) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(167,139,250,.06) 0%, transparent 80%);
+      pointer-events: none;
+    }
+
+    /* particles from letter */
+    .particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+    .pt { position: absolute; animation: ptRise linear infinite; opacity: 0; font-size: 1rem; }
+    @keyframes ptRise {
+      0%   { transform: translateY(110vh) rotate(0deg) scale(.6); opacity: 0; }
+      10%  { opacity: .7; }
+      90%  { opacity: .4; }
+      100% { transform: translateY(-10vh) rotate(720deg) scale(1); opacity: 0; }
+    }
+
+    /* layout */
+    .page { position: relative; z-index: 10; }
+
+    /* ════════════════ HERO from letter (unchanged) ════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 2rem;
+      gap: 2rem;
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(167,139,250,.12);
+      border: 1px solid rgba(196,181,253,.2);
+      border-radius: 100px; padding: .45rem 1.2rem;
+      font-size: .7rem; letter-spacing: .3em; text-transform: uppercase;
+      color: var(--lilac);
+      animation: fadeUp .9s .2s both;
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 9vw, 7rem);
+      font-weight: 600; line-height: 1.05;
+      animation: fadeUp .9s .4s both;
+    }
+    .hero-title .line1 { display: block; color: var(--cream); }
+    .hero-title .line2 {
+      display: block;
+      background: linear-gradient(120deg, var(--petal) 0%, var(--lavender) 45%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-style: italic;
+    }
+
+    .hero-quote {
+      font-style: italic;
+      color: rgba(240,171,252,.7);
+      font-size: clamp(.9rem, 2vw, 1.15rem);
+      max-width: 480px; line-height: 1.8;
+      animation: fadeUp .9s .6s both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(36px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── counter ── */
+    .counter-outer { animation: fadeUp .9s .8s both; }
+    .counter-card {
+      background: linear-gradient(135deg,
+        rgba(46,23,96,.55) 0%,
+        rgba(109,40,217,.15) 100%);
+      border: 1px solid rgba(167,139,253,.25);
+      border-radius: 28px; padding: 2.2rem 3rem;
+      backdrop-filter: blur(20px);
+      box-shadow:
+        0 0 0 1px rgba(196,181,253,.06) inset,
+        0 24px 80px rgba(109,40,217,.2);
+    }
+    .counter-eyebrow {
+      font-size: .65rem; letter-spacing: .35em; text-transform: uppercase;
+      color: var(--lavender); margin-bottom: 1.2rem;
+    }
+    .counter-nums {
+      display: flex; align-items: flex-end; gap: 1rem; justify-content: center;
+    }
+    .c-blk { display: flex; flex-direction: column; align-items: center; }
+    .c-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 600; color: var(--gold); line-height: 1;
+      text-shadow: 0 0 30px rgba(253,230,138,.3);
+    }
+    .c-lbl { font-size: .6rem; letter-spacing: .25em; color: var(--lilac); text-transform: uppercase; margin-top: .3rem; }
+    .c-dot { font-size: 2.5rem; color: rgba(196,181,253,.4); padding-bottom: .6rem; }
+    .counter-sub { text-align: center; margin-top: 1.2rem; font-size: .8rem; color: rgba(196,181,253,.55); }
+    .counter-sub strong { color: var(--petal); }
+
+    /* ════════════════ CATS from letter (SVG kitties) ════════════════ */
+    .section {
+      padding: 6rem 2rem;
+      display: flex; flex-direction: column; align-items: center; gap: 3rem;
+    }
+    .sec-eyebrow {
+      font-size: .65rem; letter-spacing: .4em; text-transform: uppercase;
+      color: var(--lavender);
+    }
+    .sec-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-style: italic; text-align: center;
+      background: linear-gradient(90deg, var(--lilac), var(--petal));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .cats-row { display: flex; gap: 3.5rem; flex-wrap: wrap; justify-content: center; align-items: flex-end; }
+    .cat-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+    .cat-label {
+      font-size: .75rem; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--lilac); background: rgba(167,139,250,.1);
+      border: 1px solid rgba(196,181,253,.15);
+      border-radius: 100px; padding: .3rem .9rem;
+    }
+
+    /* animations */
+    .a-bob   { animation: bob 2.2s ease-in-out infinite; }
+    .a-walk  { animation: walk 3.5s ease-in-out infinite; }
+    .a-sleep { animation: snore 3s ease-in-out infinite; }
+    @keyframes bob   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    @keyframes walk  { 0%,100%{transform:translateX(0) scaleX(1)} 25%{transform:translateX(18px) scaleX(1)} 50%{transform:translateX(18px) scaleX(-1)} 75%{transform:translateX(0) scaleX(-1)} }
+    @keyframes snore { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(1.05)} }
+
+    .tail  { transform-origin: 0% 100%; animation: wag 1.1s ease-in-out infinite; }
+    @keyframes wag   { 0%,100%{transform:rotate(0)} 50%{transform:rotate(20deg)} }
+    .ear-l { transform-origin: 50% 100%; animation: twitch 5s ease-in-out infinite; }
+    @keyframes twitch{ 0%,100%,55%,75%{transform:rotate(0)} 65%{transform:rotate(-18deg)} }
+    .eye-blink{ animation: eblink 4.5s ease-in-out infinite; }
+    @keyframes eblink{ 0%,100%,48%,52%{transform:scaleY(1)} 50%{transform:scaleY(.06)} }
+    .paw-wave { transform-origin: 50% 100%; animation: pwav 2s ease-in-out infinite; }
+    @keyframes pwav  { 0%,100%{transform:rotate(0)} 50%{transform:rotate(-28deg)} }
+    .zzz1{ animation: zfloat 2.2s ease-in-out infinite; }
+    .zzz2{ animation: zfloat 2.2s .55s ease-in-out infinite; }
+    .zzz3{ animation: zfloat 2.2s 1.1s ease-in-out infinite; }
+    @keyframes zfloat{ 0%{opacity:0;transform:translate(0,0) scale(.5)} 30%{opacity:1} 100%{opacity:0;transform:translate(6px,-22px) scale(1)} }
+
+    /* ════════════════ MESSAGE (letter) ════════════════ */
+    .msg-wrap { max-width: 700px; width: 100%; }
+    .msg-card {
+      background: linear-gradient(145deg, rgba(46,23,96,.65), rgba(109,40,217,.12));
+      border: 1px solid rgba(240,171,252,.18);
+      border-radius: 32px; padding: 3.5rem;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 0 100px rgba(167,139,250,.1), 0 0 0 1px rgba(196,181,253,.05) inset;
+      text-align: center;
+    }
+    .msg-icon { font-size: 2.8rem; animation: hbeat 1.5s ease-in-out infinite; display: block; margin-bottom: 1.2rem; }
+    @keyframes hbeat{ 0%,100%{transform:scale(1)} 15%{transform:scale(1.22)} 30%{transform:scale(1)} 45%{transform:scale(1.15)} }
+    .msg-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-style: italic; color: var(--petal);
+      margin-bottom: 1.5rem;
+    }
+    .msg-card p { line-height: 2; color: rgba(253,248,255,.75); font-size: .98rem; margin-bottom: 1rem; }
+    .sig { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--gold) !important; font-size: 1.2rem !important; }
+
+    /* ════════════════ REASONS ════════════════ */
+    .reasons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 1.2rem; max-width: 820px; width: 100%;
+    }
+    .r-card {
+      background: rgba(109,40,217,.1);
+      border: 1px solid rgba(196,181,253,.14);
+      border-radius: 20px; padding: 1.8rem 1.4rem;
+      text-align: center;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s;
+    }
+    .r-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 50px rgba(167,139,250,.2); }
+    .r-card .ri { font-size: 2.2rem; margin-bottom: .7rem; }
+    .r-card p { font-size: .88rem; color: rgba(253,248,255,.7); line-height: 1.7; }
+
+    /* ════════════════ PROMISE ════════════════ */
+    .promise-card {
+      max-width: 620px; width: 100%;
+      background: linear-gradient(135deg, rgba(109,40,217,.2), rgba(196,181,253,.07));
+      border: 1px solid rgba(240,171,252,.2);
+      border-radius: 24px; padding: 2.8rem;
+      text-align: center;
+      backdrop-filter: blur(16px);
+    }
+    .promise-card h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem; font-style: italic;
+      color: var(--gold); margin-bottom: 1.5rem;
+    }
+    .vow-list { list-style: none; display: flex; flex-direction: column; gap: .9rem; }
+    .vow-list li { display: flex; align-items: flex-start; gap: .8rem; font-size: .95rem; color: rgba(253,248,255,.75); line-height: 1.6; }
+    .vow-list li span { font-size: 1.1rem; flex-shrink: 0; margin-top: .1rem; }
+
+    /* ==================== MEMORY CAFE SECTION (second code) ==================== */
+    /* starfield from memory page */
+    .starfield-cafe {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, #4c1d9522 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, #7c3aed33 0%, transparent 50%),
+        radial-gradient(ellipse at 60% 80%, #a855f722 0%, transparent 50%),
+        linear-gradient(160deg, #0f0720 0%, #1e0a3c 40%, #2d1b69 100%);
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+      opacity: 0;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0; transform: scale(0.8); }
+      50% { opacity: var(--bright, 0.8); transform: scale(1.2); }
+    }
+
+    /* floating cats from memory page */
+    .cat-float {
+      position: fixed;
+      z-index: 10;
+      animation: floatCat var(--float-dur, 6s) ease-in-out infinite;
+      animation-delay: var(--float-delay, 0s);
+      pointer-events: none;
+      user-select: none;
+      font-size: var(--cat-size, 48px);
+      filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.5));
+    }
+    @keyframes floatCat {
+      0%, 100% { transform: translateY(0px) rotate(-3deg); }
+      33% { transform: translateY(-18px) rotate(3deg); }
+      66% { transform: translateY(-8px) rotate(-1deg); }
+    }
+    .cat-mochi-cafe { --float-dur: 7s; --float-delay: 0s; --cat-size: 52px; bottom: 120px; left: 3%; }
+    .cat-latte-cafe { --float-dur: 5.5s; --float-delay: 1.5s; --cat-size: 44px; bottom: 180px; right: 4%; }
+    .cat-boba-cafe  { --float-dur: 8s; --float-delay: 0.8s; --cat-size: 48px; top: 180px; right: 2%; }
+    .cat-label-cafe {
+      position: fixed;
+      font-family: 'Nunito', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--purple-pale);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .label-mochi-cafe { bottom: 100px; left: 3%; }
+    .label-latte-cafe { bottom: 160px; right: 3.5%; }
+    .label-boba-cafe  { top: 234px; right: 2%; }
+
+    /* memory grid / cards */
+    .memory-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 28px;
+    }
+    .memory-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 24px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation: cardIn 0.6s ease both;
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .memory-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      border-color: rgba(168, 85, 247, 0.55);
+      box-shadow: 0 20px 60px rgba(124, 58, 237, 0.35), 0 0 0 1px rgba(240, 171, 252, 0.15);
+    }
+    .card-img-wrap {
+      overflow: hidden;
+      height: 220px;
+      position: relative;
+    }
+    .card-img-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(15, 7, 32, 0.7) 100%);
+    }
+    .memory-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .memory-card:hover .memory-image { transform: scale(1.08); }
+    .card-cat-stamp {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      z-index: 2;
+      font-size: 26px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+    }
+    .card-body { padding: 20px 22px 24px; }
+    .card-date {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-pink);
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: white;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+    .card-desc {
+      font-size: 0.875rem;
+      color: var(--purple-pale);
+      line-height: 1.65;
+      opacity: 0.85;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(168, 85, 247, 0.15);
+    }
+    .card-hearts { font-size: 13px; color: var(--accent-pink); }
+    .delete-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      transition: all 0.2s;
+      display: none;
+    }
+    .memory-card:hover .delete-btn { display: block; }
+    .delete-btn:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    /* header cafe (inside merged) */
+    .cafe-header {
+      text-align: center;
+      padding: 80px 24px 60px;
+      position: relative;
+      margin-top: 2rem;
+    }
+    .header-cats { font-size: 36px; margin-bottom: 16px; animation: bounceCats 2s ease-in-out infinite; }
+    @keyframes bounceCats {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .site-title-cafe {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      color: white;
+      line-height: 1.15;
+      margin-bottom: 12px;
+      text-shadow: 0 0 40px rgba(168, 85, 247, 0.6);
+    }
+    .site-title-cafe em { font-style: italic; color: var(--accent-pink); }
+    .site-subtitle { font-size: 1rem; color: var(--purple-pale); opacity: 0.85; letter-spacing: 0.5px; }
+    .cat-trio {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 24px 0;
+    }
+    .cat-badge {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: var(--purple-pale);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 28px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7, #ec4899);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5);
+      transition: all 0.3s ease;
+    }
+    .add-btn:hover { transform: translateY(-3px) scale(1.05); }
+    .divider-cafe {
+      text-align: center;
+      color: var(--purple-soft);
+      opacity: 0.4;
+      margin: 0 auto 40px;
+      letter-spacing: 8px;
+      font-size: 12px;
+    }
+    /* modal styles from memory page */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 7, 32, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: linear-gradient(145deg, #1e0a3c, #2d1b69);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      border-radius: 28px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+      transform: translateY(20px) scale(0.97);
+      transition: transform 0.3s ease;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+    .modal-header { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .modal-header h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: white; }
+    label { display: block; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-light); margin-bottom: 7px; margin-top: 18px; }
+    input[type="text"], input[type="date"], textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      color: white;
+      outline: none;
+    }
+    .file-label-wrap {
+      background: rgba(255,255,255,0.07);
+      border: 1.5px dashed rgba(168, 85, 247, 0.35);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+    }
+    .cat-picker { display: flex; gap: 10px; margin-top: 4px; }
+    .cat-pick-btn {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(168, 85, 247, 0.2);
+      border-radius: 12px;
+      padding: 10px 8px;
+      cursor: pointer;
+      text-align: center;
+      color: white;
+      font-size: 13px;
+    }
+    .cat-pick-btn.selected { background: rgba(168, 85, 247, 0.2); border-color: var(--purple-soft); }
+    .cat-pick-btn span { display: block; font-size: 24px; margin-bottom: 3px; }
+    .error-msg { color: #fca5a5; font-size: 12px; margin-top: 12px; display: none; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 28px; }
+    .btn-cancel, .btn-save { padding: 13px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .btn-cancel { flex: 1; border: 1px solid rgba(255,255,255,0.12); background: transparent; color: var(--purple-pale); }
+    .btn-save { flex: 2; border: none; background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4); }
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      padding: 13px 26px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.4s ease;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: linear-gradient(135deg, #dc2626, #ef4444); }
+    footer { text-align: center; padding: 4rem 2rem 3rem; font-size: .75rem; letter-spacing: .12em; color: rgba(196,181,253,.35); }
+    footer em { color: var(--petal); font-style: normal; }
+    .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, var(--lavender), transparent); margin: 0 auto; }
+    .reveal { opacity: 0; transform: translateY(44px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+    .reveal.vis { opacity: 1; transform: none; }
+    .reveal.d1 { transition-delay: .1s; }
+    .reveal.d2 { transition-delay: .2s; }
+    .reveal.d3 { transition-delay: .3s; }
+    @media (max-width: 600px) {
+      .cat-float, .cat-label-cafe { display: none; }
+      .memory-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
-<body class="pb-20">
-    <div class="container mx-auto px-4 py-12">
-        <!-- Header -->
-        <header class="text-center mb-16">
-            <h1 class="title text-5xl md:text-6xl font-bold mb-4 text-pink-600">Our Journey Together</h1>
-            <p class="text-xl text-gray-600">Every moment with you becomes a beautiful memory</p>
-            <button id="addMemoryBtn" class="mt-8 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition">Add New Memory</button>
-        </header>
-        
-        <!-- Timeline -->
-        <div class="timeline">
-            <!-- Existing memories will be appended here -->
-        </div>
+<body>
+<div id="cursor"></div>
+<div id="trail"></div>
+<canvas id="stars"></canvas>
+<div class="mesh"></div>
+<div class="particles" id="pts"></div>
+<div class="starfield-cafe"></div> <!-- second starfield -->
+
+<!-- floating cats from memory cafe -->
+<div class="cat-float cat-mochi-cafe">🐱</div>
+<div class="cat-float cat-latte-cafe">😺</div>
+<div class="cat-float cat-boba-cafe">🐈</div>
+<div class="cat-label-cafe label-mochi-cafe">Mochi</div>
+<div class="cat-label-cafe label-latte-cafe">Latte</div>
+<div class="cat-label-cafe label-boba-cafe">Boba</div>
+
+<div class="page">
+  <!-- ========== LETTER SECTION (ORIGINAL CONTENT) ========== -->
+  <section class="hero">
+    <div class="badge">✦ Made with love, just for you ✦</div>
+    <h1 class="hero-title"><span class="line1">My Dearest,</span><span class="line2">Nurul Anis</span></h1>
+    <p class="hero-quote">"Every moment with you feels like the universe decided<br/>to be extra kind to me."</p>
+    <div class="counter-outer"><div class="counter-card"><p class="counter-eyebrow">💜 We have been together for</p><div class="counter-nums"><div class="c-blk"><span class="c-val" id="days">0</span><span class="c-lbl">Days</span></div><span class="c-dot">·</span><div class="c-blk"><span class="c-val" id="hours">00</span><span class="c-lbl">Hours</span></div><span class="c-dot">·</span><div class="c-blk"><span class="c-val" id="mins">00</span><span class="c-lbl">Minutes</span></div><span class="c-dot">·</span><div class="c-blk"><span class="c-val" id="secs">00</span><span class="c-lbl">Seconds</span></div></div><p class="counter-sub">Since <strong>February 27, 2026</strong> 🌸 — and counting forever.</p></div></div>
+  </section>
+
+  <section class="section reveal"><p class="sec-eyebrow">our little world</p><h2 class="sec-title">Our Adorable Little Cats 🐾</h2>
+    <div class="cats-row">
+      <div class="cat-wrap"><svg class="a-bob" width="105" height="125" viewBox="0 0 105 125"><path class="tail" d="M20,98 Q4,90 8,72 Q13,56 22,64" fill="none" stroke="#c084fc" stroke-width="9" stroke-linecap="round"/><ellipse cx="52" cy="84" rx="32" ry="30" fill="#9333ea"/><ellipse class="paw-wave" cx="82" cy="82" rx="9" ry="7" fill="#c084fc"/><circle cx="52" cy="46" r="24" fill="#c084fc"/><polygon class="ear-l" points="32,30 23,11 42,24" fill="#9333ea"/><polygon points="33,28 26,15 41,23" fill="#f0abfc"/><polygon points="72,30 81,11 62,24" fill="#9333ea"/><polygon points="71,28 78,15 63,23" fill="#f0abfc"/><ellipse class="eye-blink" cx="43" cy="44" rx="4.5" ry="5.5" fill="#0f0720"/><ellipse class="eye-blink" cx="61" cy="44" rx="4.5" ry="5.5" fill="#0f0720"/><circle cx="44.5" cy="42.5" r="1.8" fill="white" opacity=".9"/><circle cx="62.5" cy="42.5" r="1.8" fill="white" opacity=".9"/><ellipse cx="52" cy="53" rx="2.8" ry="2" fill="#f472b6"/><path d="M47,55.5 Q52,60 57,55.5" fill="none" stroke="#f472b6" stroke-width="1.4"/><line x1="26" y1="52" x2="45" y2="54" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><line x1="26" y1="56" x2="45" y2="55" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><line x1="78" y1="52" x2="59" y2="54" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><line x1="78" y1="56" x2="59" y2="55" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><ellipse cx="35" cy="51" rx="5.5" ry="3.2" fill="#fda4af" opacity=".4"/><ellipse cx="69" cy="51" rx="5.5" ry="3.2" fill="#fda4af" opacity=".4"/></svg><span class="cat-label">Mochi 🐾</span></div>
+      <div class="cat-wrap"><svg class="a-sleep" width="130" height="85" viewBox="0 0 130 85"><ellipse cx="68" cy="64" rx="46" ry="19" fill="#7c3aed"/><path d="M110,67 Q128,54 124,40 Q120,28 111,33" fill="none" stroke="#7c3aed" stroke-width="8" stroke-linecap="round"/><circle cx="22" cy="43" r="21" fill="#a78bfa"/><polygon points="8,28 3,12 19,25" fill="#7c3aed"/><polygon points="9,27 5,15 18,24" fill="#f0abfc"/><polygon points="34,28 40,12 24,25" fill="#7c3aed"/><polygon points="33,27 38,15 25,24" fill="#f0abfc"/><path d="M12,41 Q19,37.5 26,41" fill="none" stroke="#0f0720" stroke-width="2" stroke-linecap="round"/><ellipse cx="22" cy="48" rx="2.2" ry="1.7" fill="#f472b6"/><line x1="2" y1="47" x2="18" y2="49" stroke="#e9d5ff" stroke-width=".8" opacity=".45"/><line x1="2" y1="51" x2="18" y2="50" stroke="#e9d5ff" stroke-width=".8" opacity=".45"/><line x1="42" y1="47" x2="26" y2="49" stroke="#e9d5ff" stroke-width=".8" opacity=".45"/><line x1="42" y1="51" x2="26" y2="50" stroke="#e9d5ff" stroke-width=".8" opacity=".45"/><ellipse cx="11" cy="46" rx="4.5" ry="2.8" fill="#fda4af" opacity=".38"/><ellipse cx="33" cy="46" rx="4.5" ry="2.8" fill="#fda4af" opacity=".38"/><text class="zzz1" x="44" y="30" fill="#c4b5fd" font-size="12" font-family="DM Sans" font-weight="500">z</text><text class="zzz2" x="56" y="20" fill="#c4b5fd" font-size="15" font-family="DM Sans" font-weight="500">z</text><text class="zzz3" x="70" y="9"  fill="#c4b5fd" font-size="18" font-family="DM Sans" font-weight="500">z</text></svg><span class="cat-label">Latte 😴</span></div>
+      <div class="cat-wrap"><svg class="a-walk" width="115" height="118" viewBox="0 0 115 118"><path class="tail" d="M24,74 Q8,66 12,50 Q17,36 26,44" fill="none" stroke="#5b21b6" stroke-width="8" stroke-linecap="round"/><ellipse cx="58" cy="76" rx="30" ry="24" fill="#5b21b6"/><circle cx="58" cy="44" r="22" fill="#7c3aed"/><polygon points="40,30 34,14 50,26" fill="#5b21b6"/><polygon points="41,29 36,17 49,25" fill="#f0abfc"/><polygon points="76,30 82,14 66,26" fill="#5b21b6"/><polygon points="75,29 80,17 67,25" fill="#f0abfc"/><ellipse class="eye-blink" cx="49" cy="42" rx="5" ry="6" fill="white"/><ellipse class="eye-blink" cx="67" cy="42" rx="5" ry="6" fill="white"/><ellipse cx="49.5" cy="43" rx="3" ry="4" fill="#0f0720"/><ellipse cx="67.5" cy="43" rx="3" ry="4" fill="#0f0720"/><circle cx="50.5" cy="41" r="1.5" fill="white"/><circle cx="68.5" cy="41" r="1.5" fill="white"/><ellipse cx="58" cy="51" rx="2.5" ry="1.8" fill="#f472b6"/><path d="M53,53.5 Q58,58 63,53.5" fill="none" stroke="#f472b6" stroke-width="1.3"/><line x1="36" y1="50" x2="52" y2="52" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><line x1="36" y1="54" x2="52" y2="53" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><line x1="80" y1="50" x2="64" y2="52" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><line x1="80" y1="54" x2="64" y2="53" stroke="#e9d5ff" stroke-width=".9" opacity=".5"/><rect x="32" y="92" width="11" height="18" rx="5.5" fill="#4c1d95"/><rect x="46" y="95" width="11" height="15" rx="5.5" fill="#4c1d95"/><rect x="61" y="95" width="11" height="15" rx="5.5" fill="#4c1d95"/><rect x="74" y="92" width="11" height="18" rx="5.5" fill="#4c1d95"/><ellipse cx="42" cy="49" rx="5" ry="3" fill="#fda4af" opacity=".4"/><ellipse cx="74" cy="49" rx="5" ry="3" fill="#fda4af" opacity=".4"/></svg><span class="cat-label">Boba 🐱</span></div>
     </div>
-    
-    <!-- Add Memory Modal -->
-    <div id="memoryModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4">
-            <h2 class="text-2xl font-bold mb-4">Add a New Memory</h2>
-            <form id="memoryForm">
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Memory Title</label>
-                    <input type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="Our special day" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Date</label>
-                    <input type="date" class="w-full px-3 py-2 border rounded-lg" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Upload Image</label>
-                    <input type="file" accept="image/*" class="w-full px-3 py-2 border rounded-lg" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-gray-700 mb-2">Description</label>
-                    <textarea class="w-full px-3 py-2 border rounded-lg" rows="4" placeholder="Why is this memory special?" required></textarea>
-                </div>
-                <div class="flex justify-end">
-                    <button type="button" id="cancelMemoryBtn" class="mr-2 px-4 py-2 bg-gray-200 rounded-lg">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600">Save Memory</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <script>
-        function setupModal() {
-            const modal = document.getElementById('memoryModal');
-            const addBtn = document.getElementById('addMemoryBtn');
-            const cancelBtn = document.getElementById('cancelMemoryBtn');
-            const form = document.getElementById('memoryForm');
-            
-            addBtn.addEventListener('click', () => {
-                modal.classList.remove('hidden');
-            });
-            
-            cancelBtn.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
-            
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                
-                // Get form values
-                const title = form.querySelector('input[type="text"]').value;
-                const date = form.querySelector('input[type="date"]').value;
-                const fileInput = form.querySelector('input[type="file"]');
-                const description = form.querySelector('textarea').value;
+  </section>
 
-                // Create a new memory card
-                const newMemory = document.createElement('div');
-                newMemory.className = 'memory-card mb-16 w-full md:w-1/2 mx-auto md:mx-0 relative group';
-                newMemory.setAttribute('data-date', date);
+  <section class="section reveal"><p class="sec-eyebrow">from the heart</p><h2 class="sec-title">A Letter For You</h2><div class="msg-wrap"><div class="msg-card"><span class="msg-icon">💜</span><h2>To My Beloved Nurul Anis,</h2><p>Before you came into my life, I never quite understood what people meant when they said someone could make the whole world feel right. Now I do because that's exactly what you do to me, every single day.</p><p>You are my calm on anxious days, my laughter on quiet evenings, and the first thing I think of when something beautiful happens because I want to share it with you. You have this rare gift of making ordinary moments feel extraordinary.</p><p>I don't have all the perfect words, but I have one simple truth: loving you is the easiest, most natural thing I have ever done. And I will keep choosing you, day after day, for as long as you'll have me. 🌸</p><p class="sig">— Yours always, forever & a day 💜</p></div></div></section>
 
-                // Create a FileReader to read the uploaded image
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    newMemory.innerHTML = `
-                        <div class="polaroid-effect">
-                            <img src="${event.target.result}" alt="${title}" class="memory-image w-full">
-                        </div>
-                        <div class="p-6">
-                            <div class="memory-date text-2xl mb-2">${new Date(date).toLocaleDateString()}</div>
-                            <h3 class="text-2xl font-semibold mb-3">${title}</h3>
-                            <p class="text-gray-600">${description}</p>
-                            <div class="mt-4 flex items-center">
-                                <span class="text-pink-500 mr-2">❤️</span>
-                                <span class="text-sm text-gray-500">New memory added</span>
-                            </div>
-                        </div>
-                    `;
-                    // Append the new memory to the timeline
-                    const timeline = document.querySelector('.timeline');
-                    timeline.appendChild(newMemory);
-                    
-                    // Close the modal and reset the form
-                    modal.classList.add('hidden');
-                    form.reset();
-                };
+  <section class="section reveal"><p class="sec-eyebrow">endless reasons</p><h2 class="sec-title">Why I Love You</h2><div class="reasons-grid"><div class="r-card reveal d1"><div class="ri">🌸</div><p>Your smile is the kind that makes strangers look twice and makes my heart skip every single time.</p></div><div class="r-card reveal d2"><div class="ri">🌙</div><p>Late night conversations with you feel like the whole universe has slowed down just for us.</p></div><div class="r-card reveal d3"><div class="ri">💬</div><p>The way you listen, really listen, makes me feel seen in a way I have never felt before.</p></div><div class="r-card reveal d1"><div class="ri">✨</div><p>You find magic in small things, and somehow that makes the whole world shine a little brighter.</p></div><div class="r-card reveal d2"><div class="ri">🐱</div><p>You are adorably cat, like independent, warm, and just the right amount of mischievous.</p></div><div class="r-card reveal d3"><div class="ri">💜</div><p>With you, home is not a place. It is a feeling and I feel it whenever you are near.</p></div></div></section>
 
-                // Read the uploaded file as a data URL
-                if (fileInput.files.length > 0) {
-                    reader.readAsDataURL(fileInput.files[0]);
-                }
-            });
-        }
+  <section class="section reveal"><p class="sec-eyebrow">my vow to you</p><h2 class="sec-title">Promises I Keep</h2><div class="promise-card"><h2>For You, Always</h2><ul class="vow-list"><li><span>🌸</span> I promise to be the reason you smile, not just on good days but especially on hard ones.</li><li><span>🛡️</span> I promise to stand beside you through every storm, without hesitation.</li><li><span>📖</span> I promise to never stop learning who you are, because you are worth every page.</li><li><span>😂</span> I promise to keep making you laugh, even when my jokes are terrible.</li><li><span>💜</span> I promise that my love for you will only grow deeper with every day that passes.</li></ul></div></section>
 
-        // Initialize everything
-        document.addEventListener('DOMContentLoaded', () => {
-            setupModal();
-        });
-    </script>
+  <!-- ========== MEMORY CAFE SECTION (second code integrated fully) ========== -->
+  <div class="cafe-header">
+    <div class="header-cats">🐱 🐈 😺</div>
+    <h1 class="site-title-cafe">Our Little<br><em>Memory Café</em></h1>
+    <p class="site-subtitle">Curated by Mochi, Latte &amp; Boba ✿</p>
+    <div class="cat-trio"><div class="cat-badge">😺 Mochi</div><div class="cat-badge">🐈 Latte</div><div class="cat-badge">😺 Boba</div></div>
+    <button class="add-btn" id="addMemoryBtn"><span>✦</span> Add New Memory</button>
+  </div>
+  <div class="divider-cafe">✦ · · · · ✦ · · · · ✦</div>
+  <div class="memory-grid" id="memoryGrid"><div id="emptyState"><span class="empty-emoji">🐾</span><p>No memories yet — Mochi, Latte & Boba are waiting!</p></div></div>
+  <footer>Built with <em>💜</em> and all the love in the world — for <em>Nurul Anis</em>, my forever person.</footer>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal"><div class="modal-box"><div class="modal-header"><span style="font-size:28px">🐱</span><h2>New Memory</h2></div><label>Choose your cat companion</label><div class="cat-picker"><button type="button" class="cat-pick-btn selected" data-cat="🍡" data-name="Mochi"><span>🍡</span>Mochi</button><button type="button" class="cat-pick-btn" data-cat="☕" data-name="Latte"><span>☕</span>Latte</button><button type="button" class="cat-pick-btn" data-cat="🧋" data-name="Boba"><span>🧋</span>Boba</button></div><label>Memory Title</label><input type="text" id="inputTitle" placeholder="Our starry night walk..."><label>Date</label><input type="date" id="inputDate"><label>Upload Photo</label><div class="file-label-wrap"><input type="file" id="inputFile" accept="image/*"><p style="font-size:12px; color: #c084fc; margin-top:6px; pointer-events:none">📷 Click to choose a photo</p></div><label>Description</label><textarea id="inputDesc" rows="3" placeholder="What made this moment magical?"></textarea><p class="error-msg" id="formError">⚠ Please fill in all fields and upload a photo.</p><div class="modal-actions"><button class="btn-cancel" id="cancelBtn">Cancel</button><button class="btn-save" id="saveBtn">Save Memory ✦</button></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // ---- CURSOR + STAR + PARTICLES from letter (unchanged) ----
+  const cur = document.getElementById('cursor'); const trail = document.getElementById('trail'); let mx=0,my=0,tx=0,ty=0;
+  document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; cur.style.cssText=`left:${mx}px;top:${my}px`; });
+  setInterval(()=>{ tx+=(mx-tx)*.18; ty+=(my-ty)*.18; trail.style.cssText=`left:${tx}px;top:${ty}px`; },16);
+  const cv = document.getElementById('stars'); const cx2 = cv.getContext('2d'); let st=[];
+  function resize(){ cv.width=innerWidth; cv.height=innerHeight; st=[]; for(let i=0;i<180;i++) st.push({x:Math.random()*cv.width,y:Math.random()*cv.height,r:Math.random()*1.6+.2,a:Math.random(),da:(Math.random()*.007+.002)*(Math.random()<.5?1:-1)}); }
+  function draw(){ cx2.clearRect(0,0,cv.width,cv.height); st.forEach(s=>{ s.a+=s.da; if(s.a>1||s.a<0)s.da*=-1; cx2.globalAlpha=Math.abs(s.a); cx2.fillStyle='#e9d5ff'; cx2.beginPath(); cx2.arc(s.x,s.y,s.r,0,Math.PI*2); cx2.fill(); }); cx2.globalAlpha=1; requestAnimationFrame(draw); }
+  window.addEventListener('resize',resize); resize(); draw();
+  const pCon = document.getElementById('pts'); const pEmoji = ['💜','🌸','✨','💫','💕','🫶','⭐','🌙'];
+  for(let i=0;i<22;i++){ const p=document.createElement('div'); p.className='pt'; p.textContent=pEmoji[i%pEmoji.length]; p.style.left=Math.random()*100+'vw'; p.style.animationDuration=(9+Math.random()*14)+'s'; p.style.animationDelay=(Math.random()*18)+'s'; p.style.fontSize=(.75+Math.random()*.85)+'rem'; pCon.appendChild(p); }
+  const START = new Date('2026-02-27T00:00:00');
+  function tick(){ const d = Date.now()-START; document.getElementById('days').textContent = Math.floor(d/86400000); document.getElementById('hours').textContent = String(Math.floor((d%86400000)/3600000)).padStart(2,'0'); document.getElementById('mins').textContent = String(Math.floor((d%3600000)/60000)).padStart(2,'0'); document.getElementById('secs').textContent = String(Math.floor((d%60000)/1000)).padStart(2,'0'); }
+  tick(); setInterval(tick,1000);
+  const obs = new IntersectionObserver(entries=>entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('vis'); }),{threshold:.12}); document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  
+  // ---- MEMORY CAFE SCRIPTS (integrated) ----
+  const STORAGE_KEY = 'memoryCafe_v2';
+  let selectedCat = { emoji: '🍡', name: 'Mochi' };
+  (function buildStarsCafe() { const sf = document.querySelector('.starfield-cafe'); for (let i = 0; i < 90; i++) { const s = document.createElement('div'); s.className = 'star'; const size = Math.random() * 2.5 + 0.5; s.style.cssText = `width:${size}px; height:${size}px; top:${Math.random()*100}%; left:${Math.random()*100}%; --dur:${2 + Math.random()*4}s; --delay:${Math.random()*5}s; --bright:${0.4 + Math.random()*0.6};`; sf.appendChild(s); } })();
+  function loadMemories() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { return []; } }
+  function saveMemories(memories) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(memories)); } catch(e) { toastMsg('Storage full.', true); } }
+  function toastMsg(msg, err = false) { const el = document.getElementById('toast'); el.textContent = msg; el.className = 'toast show' + (err ? ' error' : ''); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 3000); }
+  function compress(file, cb) { const r = new FileReader(); r.onload = e => { const img = new Image(); img.onload = () => { const MAX = 900; const scale = img.width > MAX ? MAX / img.width : 1; const c = document.createElement('canvas'); c.width = img.width * scale; c.height = img.height * scale; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', 0.72)); }; img.src = e.target.result; }; r.readAsDataURL(file); }
+  function createCard(mem) { const card = document.createElement('div'); card.className = 'memory-card'; card.dataset.id = mem.id; const dateStr = mem.date ? new Date(mem.date + 'T00:00:00').toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' }) : ''; card.innerHTML = `<div class="card-img-wrap"><div class="card-cat-stamp">${mem.catEmoji || '🍡'}</div><img class="memory-image" src="${mem.image}" alt="${mem.title}"></div><div class="card-body"><div class="card-date">${dateStr}</div><h3 class="card-title">${mem.title}</h3><p class="card-desc">${mem.description}</p><div class="card-footer"><span class="card-hearts">✦ Saved by ${mem.catName || 'Mochi'}</span><button class="delete-btn" title="Delete this memory">🗑</button></div></div>`; card.querySelector('.delete-btn').addEventListener('click', () => { if(confirm('Delete this memory?')){ const mems = loadMemories().filter(m => m.id !== mem.id); saveMemories(mems); renderAll(); toastMsg('Memory deleted 🐾'); } }); return card; }
+  function renderAll() { const grid = document.getElementById('memoryGrid'); const empty = document.getElementById('emptyState'); const mems = loadMemories(); Array.from(grid.querySelectorAll('.memory-card')).forEach(c => c.remove()); if (mems.length === 0) { empty.style.display = 'block'; } else { empty.style.display = 'none'; mems.forEach((m, i) => { const card = createCard(m); card.style.animationDelay = `${i * 0.08}s`; grid.appendChild(card); }); } }
+  document.querySelectorAll('.cat-pick-btn').forEach(btn => { btn.addEventListener('click', () => { document.querySelectorAll('.cat-pick-btn').forEach(b => b.classList.remove('selected')); btn.classList.add('selected'); selectedCat = { emoji: btn.dataset.cat, name: btn.dataset.name }; }); });
+  const modal = document.getElementById('modal');
+  document.getElementById('addMemoryBtn').addEventListener('click', () => modal.classList.add('open'));
+  document.getElementById('cancelBtn').addEventListener('click', () => { modal.classList.remove('open'); document.getElementById('inputTitle').value = ''; document.getElementById('inputDate').value = ''; document.getElementById('inputFile').value = ''; document.getElementById('inputDesc').value = ''; document.getElementById('formError').style.display = 'none'; });
+  modal.addEventListener('click', e => { if (e.target === modal) { modal.classList.remove('open'); } });
+  document.getElementById('saveBtn').addEventListener('click', () => { const title = document.getElementById('inputTitle').value.trim(); const date  = document.getElementById('inputDate').value; const file  = document.getElementById('inputFile').files[0]; const desc  = document.getElementById('inputDesc').value.trim(); const err   = document.getElementById('formError'); if (!title || !date || !file || !desc) { err.style.display = 'block'; return; } err.style.display = 'none'; compress(file, base64 => { const mem = { id: Date.now().toString(), title, date, description: desc, image: base64, catEmoji: selectedCat.emoji, catName: selectedCat.name }; const mems = loadMemories(); mems.unshift(mem); saveMemories(mems); renderAll(); modal.classList.remove('open'); document.getElementById('inputTitle').value = ''; document.getElementById('inputDate').value = ''; document.getElementById('inputFile').value = ''; document.getElementById('inputDesc').value = ''; toastMsg(`✦ Memory saved by ${selectedCat.name}!`); }); });
+  renderAll();
+</script>
 </body>
 </html>
